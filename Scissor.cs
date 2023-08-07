@@ -5,13 +5,13 @@ using Pamella;
 
 public class Scissor : Individual
 {
-    private static Image img = Bitmap.FromFile("scissor.png");
+    public static readonly Image Img = Bitmap.FromFile("scissor.png");
 
     public override void Draw(IGraphics g)
     {
         g.DrawImage(
             new RectangleF(X - 20, Y - 20, 40, 40),
-            img
+            Img
         );
     }
 

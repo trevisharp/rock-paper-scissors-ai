@@ -5,13 +5,13 @@ using Pamella;
 
 public class Rock : Individual
 {
-    private static Image img = Bitmap.FromFile("rock.png");
+    public static readonly Image Img = Bitmap.FromFile("rock.png");
 
     public override void Draw(IGraphics g)
     {
         g.DrawImage(
             new RectangleF(X - 20, Y - 20, 40, 40),
-            img
+            Img
         );
     }
 
