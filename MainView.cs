@@ -6,16 +6,21 @@ using Pamella;
 
 public class MainView : View
 {
-    private int N = 15;
+    private int N = 2;
     private float variance = 120;
 
     public List<Individual> population = new List<Individual>();
 
     protected override void OnStart(IGraphics g)
     {
-        initPopulation<Rock>(N, g.Width, g.Height);
-        initPopulation<Paper>(N, g.Width, g.Height);
-        initPopulation<Scissor>(N, g.Width, g.Height);
+        var random = new RandomStrategy();
+        var killer = new KillerStrategy();
+
+        initPopulation<Rock>(N, g.Width, g.Height, killer);
+        initPopulation<Paper>(N, g.Width, g.Height, killer);
+        initPopulation<Scissor>(N, g.Width, g.Height, killer);
+
+        AlwaysInvalidateMode();
 
         g.SubscribeKeyDownEvent(key =>
         {
@@ -26,6 +31,8 @@ public class MainView : View
 
     protected override void OnRender(IGraphics g)
     {
+        g.Clear(Color.White);
+
         foreach (var indiviual in population)
         {
             indiviual.Move(population);
@@ -76,7 +83,7 @@ public class MainView : View
         );
     }
 
-    void initPopulation<T>(int N, int widht, int height) where T : Individual, new()
+    void initPopulation<T>(int N, int widht, int height, IStrategy strategy) where T : Individual, new()
     {
         float baseX = rand() * widht;
         float baseY = rand() * height;
@@ -84,6 +91,8 @@ public class MainView : View
         for (int k = 0; k < N; k++)
         {
             var individual = new T();
+
+            individual.Strategy = strategy;
 
             individual.X = baseX + (2 * rand() - 1) * variance;
             individual.Y = baseY + (2 * rand() - 1) * variance;
@@ -94,24 +103,35 @@ public class MainView : View
 
     void testCollision()
     {
-        int len = population.Count;
-        for (int i = 0; i < len; i++)
+        var collisions = new List<(Individual, Individual)>();
+        
+        for (int i = 0; i < population.Count; i++)
         {
-            var indiviual = population[i];
+            var individual = population[i];
 
-            for (int j = i + 1; j < len; j++)
+            for (int j = 0; j < population.Count; j++)
             {
                 var other = population[j];
 
-                var dx = indiviual.X - other.X;
-                var dy = indiviual.Y - other.Y;
+                var dx = individual.X - other.X;
+                var dy = individual.Y - other.Y;
 
                 if (dx * dx + dy * dy > 20 * 20)
                     continue;
                 
-                indiviual.OnTouch(other, population);
-                other.OnTouch(indiviual, population);
+                collisions.Add((individual, other));
+                collisions.Add((other, individual));
+                break;
             }
+        }
+
+        foreach (var collision in collisions)
+        {
+            var individual = collision.Item1;
+            var other = collision.Item2;
+
+            individual.OnTouch(other, population);
+            other.OnTouch(individual, population);
         }
     }
 }

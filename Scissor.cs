@@ -15,6 +15,12 @@ public class Scissor : Individual
         );
     }
 
+    public override bool IsEnemy(Individual other)
+        => other is Rock;
+
+    public override bool IsTarget(Individual other)
+        => other is Paper;
+
     public override void OnTouch(Individual other, List<Individual> population)
     {
         if (other is Rock)
@@ -23,7 +29,8 @@ public class Scissor : Individual
             population.Add(new Rock
             {
                 X = this.X,
-                Y = this.Y
+                Y = this.Y,
+                Strategy = this.Strategy
             });
         }
     }
